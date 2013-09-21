@@ -1,0 +1,106 @@
+var data = {{ json_obj|safe }};
+
+//javascript:$(\'.' + data.id + '\').style.display:inline;
+//document.getElementByClassName(data.id).style.display = "inline"
+
+id_count = 0;
+data.id = 'id'+id_count;
+data.parent = "";
+document.write('<table class=\"table table-striped table-bordered table-hover\"><tr id=\"'+ data.id +'\"">');
+document.write('<th>' + data.label + '</th><th>' + data.amount  + '</th><th>100%</th>');
+document.write('</tr>');
+
+var offset = 0;
+var offset_str = "";
+
+var children_list = [];
+
+
+function get_text_amount(amount) {
+
+        if (amount < 1000) {textAmount = amount.toString() + " руб."} 
+        else if ((amount < 1000000)&&(amount > 1000)) {textAmount = (amount/1000).toFixed(1).toString() + " тыс"}
+        else if ((amount < 1000000000)&&(amount > 1000000)) {textAmount = (amount/1000000).toFixed(1).toString() + " млн"}
+        else if ((amount < 1000000000000)&&(amount > 1000000000)) {textAmount = (amount/1000000000).toFixed(1).toString() + " млрд"}
+        else if ((amount < 1000000000000000)&&(amount > 1000000000000)) {textAmount = (amount/1000000000000).toFixed(1).toString() + " трлн"}
+
+    return textAmount;
+}
+
+function recurse_tree(item, parent, amount) {
+        for(var c=0; c<item.length; c++) {
+            offset_str = "";
+            for (var i = 0; i< offset; i++) {
+                offset_str += '&nbsp;&mdash;&nbsp;';
+            }
+            offset_str += '&nbsp;';
+            item[c].parent = parent;
+            id_count += 1;
+            item[c].id = 'id' + id_count;
+            if (item[c].parent == 'id0') {            
+                display = 'table-row';
+            }
+            else {
+                display = 'none';
+            }
+            document.write('<tr id= \"' + item[c].id + '\" class=\"');
+            if (item[c].children instanceof Object) {
+                cursor = 'pointer';
+            }
+            else {
+                cursor = 'default';
+            }
+            document.write(item[c].parent +'\" style="display:' + display + '; cursor:' + cursor + ';" onclick="open_rows(\'' + item[c].id + '\')"><td>'+ offset_str + item[c].label + '</td><td>ggg' + get_text_amount(item[c].amount)  + '</td><td>' + (item[c].amount/(amount/100)).toFixed(2) + '%</td></tr>' );
+            if (item[c].children instanceof Object) {
+                // here: node is object
+                offset += 1;
+                recurse_tree(item[c].children, item[c].id, item[c].amount);
+                offset -= 1;
+                
+            }
+
+            // here: node isn't object
+        }
+
+}
+recurse_tree(data.children, data.id, data.amount);
+document.write('</table>');
+
+function find_children(className) {
+
+    list = document.getElementsByClassName(className);
+    for (var i0 = 0; i0<list.length; i0++) {
+        children_list.push(list[i0].id);
+        }
+
+
+    for (var k = 0; k<=children_list.length; k++) {
+        list = document.getElementsByClassName(children_list[k]);
+        for (var i = 0; i<list.length; i++) {
+            children_list.push(list[i].id);
+            }
+        }
+        
+
+}
+
+
+function open_rows(className) {
+
+                element = document.getElementById(className);
+                
+                list = document.getElementsByClassName(className);            
+
+                if (list[0].style.display == 'none') {
+                    //alert(list[0].style.display);
+                    for (var i = 0; i<list.length; i++) {
+                        list[i].style.display = 'table-row';      
+                        }
+                }
+                else {
+                        find_children(className);
+                        for (var j = 0; j<children_list.length; j++) {
+                            document.getElementById(children_list[j]).style.display = "none";
+                            }                    
+                }
+};
