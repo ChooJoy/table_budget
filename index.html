@@ -88,13 +88,15 @@ document.write('</table>');
 
 function find_children(className) {
 
+    children_list = [];
+
     list = document.getElementsByClassName(className);
     for (var i0 = 0; i0<list.length; i0++) {
         children_list.push(list[i0].id);
         }
 
 
-    for (var k = 0; k<=children_list.length; k++) {
+    for (var k = 0; k<children_list.length; k++) {
         list = document.getElementsByClassName(children_list[k]);
         for (var i = 0; i<list.length; i++) {
             children_list.push(list[i].id);
